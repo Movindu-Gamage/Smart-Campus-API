@@ -21,7 +21,7 @@ All responses come back as JSON. All errors return a clean JSON message — no J
 **Base URL:** `http://localhost:8080/smart-campus-w2121365/api/v1/`
 
 ---
-
+https://github.com/Movindu-Gamage/Smart-Campus-API.git
 ## Build & Run Instructions
 
 ### Prerequisites
@@ -31,7 +31,7 @@ All responses come back as JSON. All errors return a clean JSON message — no J
 
 ### Step 1 — Clone the Repository
 ```bash
-git clone https://github.com/YOUR_GITHUB_USERNAME/smart-campus-w2121365.git
+git clone https://github.com/Movindu-Gamage/Smart-Campus-API.git
 cd smart-campus-w2121365
 ```
 
