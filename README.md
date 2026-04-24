@@ -12,47 +12,42 @@ The Smart Campus API is a RESTful web service developed with JAX-RS (Java API fo
 
 The API has three main resources:
 
-- **Rooms** — Physical spaces on campus. You can create, list, get, and delete rooms
-- **Sensors** — IoT devices deployed within rooms. You can register sensors inside rooms and filter them by type
-- **Sensor Readings** — Historical measurement data recorded by each sensor. You can add readings to a sensor and view its reading history
+- **Rooms** - Physical spaces on campus. You can create, list, get, and delete rooms
+- **Sensors** - IoT devices deployed within rooms. You can register sensors inside rooms and filter them by type
+- **Sensor Readings** - Historical measurement data recorded by each sensor. You can add readings to a sensor and view its reading history
 
 All responses come back as JSON. All errors return a clean JSON message — no Java stack traces are ever shown to the user.
 
 **Base URL:** `http://localhost:8080/smart-campus-w2121365/api/v1/`
 
 ---
-https://github.com/Movindu-Gamage/Smart-Campus-API.git
+
 ## Build & Run Instructions
 
 ### Prerequisites
 - Java JDK 11 or higher installed
-- Apache Maven 3.6+ installed and added to PATH
+- Apache NetBeans installed
 - Apache Tomcat 9.0 extracted (e.g. to `C:\apache-tomcat-9.0.100`)
 
-### Step 1 — Clone the Repository
+### Step 1 Clone the Repository
 ```bash
 git clone https://github.com/Movindu-Gamage/Smart-Campus-API.git
-cd smart-campus-w2121365
 ```
 
-### Step 2 — Build the Project
-```bash
-mvn clean package
-```
-This creates the file `target/smart-campus-w2121365-1.0-SNAPSHOT.war`
+### Step 2 - Build the Project
+Open the project in NetBeans, then:
+- Right click the project → **Clean and Build**
+- Wait for **BUILD SUCCESS** in the output window
 
-### Step 3 — Copy the WAR file to Tomcat
-```bash
-copy target\smart-campus-w2121365-1.0-SNAPSHOT.war C:\apache-tomcat-9.0.100\webapps\
-```
+### Step 3 - Copy the WAR file to Tomcat
+Go to your project folder → open the `target` folder → copy `smart-campus-w2121365-1.0-SNAPSHOT.war` → paste it into `C:\apache-tomcat-9.0.100\webapps\`
 
-### Step 4 — Start Tomcat
-Open a new terminal window and navigate to Tomcat's bin folder:
-```bash
-C:\apache-tomcat-9.0.100\bin\startup.bat
-```
+### Step 4 - Start Tomcat
+In NetBeans:
+- Right click the project → **Run**
+- NetBeans will start Tomcat and deploy automatically
 
-### Step 5 — Verify the API is Running
+### Step 5 - Verify the API is Running
 Open your browser and navigate to:
 ```
 http://localhost:8080/smart-campus-w2121365/api/v1/
@@ -114,11 +109,11 @@ curl -X GET http://localhost:8080/smart-campus-w2121365/api/v1/sensors/CO2-101/r
 
 ### Part 1: Service Architecture & Setup
 
-**Question 1 — Explain the default lifecycle of a JAX-RS Resource class and how it affects in-memory data management.**
+**Question 1**
 
 By default, JAX-RS creates a new instance of a resource class for each HTTP request, meaning variables in the class are discarded after the request. As a result, shared data cannot be stored in a resource class. To preserve data across requests, this project uses a separate DataStore class with static lists and maps. Static fields belong to the class itself and persist as long as the server runs.
 
-**Question 2 — Why is HATEOAS considered a hallmark of advanced REST design?**
+**Question 2**
 
 HATEOAS stands for Hypermedia as the Engine of Application State, where an API includes links to related resources in its responses, allowing clients to easily navigate. For example, the discovery endpoint offers links to /api/v1/rooms and /api/v1/sensors, eliminating the need for clients to hardcode URLs. If a URL changes later, clients can still function by following the links. This makes the API self-describing and simpler to use.
 
@@ -126,11 +121,11 @@ HATEOAS stands for Hypermedia as the Engine of Application State, where an API i
 
 ### Part 2: Room Management
 
-**Question 1 **
+**Question 1**
 
 Returning only IDs results in a smaller, faster response, but requires the client to make additional requests for each room's details. This means 51 requests for 50 rooms, which is inefficient. In contrast, sending full room objects offers all information in a single request, and since the room data is small, this approach is preferable to avoid extra round trips, even if responses are larger.
 
-**Question 2 **
+**Question 2**
 
 Yes, DELETE is idempotent. When you delete a room the first time, it is removed and you get a 200 OK. If you send the same request again, you receive a 404 Not Found because the room is gone. The outcome is the same — the room does not exist. This aligns with the HTTP standard, which mandates that DELETE be idempotent: the server state remains unchanged whether you request it once or multiple times.
 
@@ -138,11 +133,11 @@ Yes, DELETE is idempotent. When you delete a room the first time, it is removed 
 
 ### Part 3: Sensor Operations & Linking
 
-**Question 1 **
+**Question 1**
 
 JAX-RS verifies the Content-Type header of each incoming request prior to invoking your Java method. If the client transmits text/plain or application/xml instead of application/json, JAX-RS will automatically return HTTP 415 Unsupported Media Type and will not execute your code. There is no need to implement any additional code to manage this — Jersey handles it automatically.
 
-**Question 2 **
+**Question 2**
 
 The URL path identifies a particular resource. The path /api/v1/sensors signifies the entire collection of sensors. Incorporating the filter type into the path, such as /sensors/type/CO2, implies that type/CO2 is an independent resource, which is misleading and incorrect. Using query parameters like ?type=CO2 is the appropriate method for filtering — they are intended for searching and refining results. They also work seamlessly together, allowing more filters to be added later without altering the URL structure.
 
@@ -150,7 +145,7 @@ The URL path identifies a particular resource. The path /api/v1/sensors signifie
 
 ### Part 4: Deep Nesting with Sub-Resources
 
-**Question 1 **
+**Question 1**
 
 Instead of consolidating all code into a single resource class, the sub-resource locator enables dividing work into smaller, focused classes. In this project, when a request is made to /sensors/{sensorId}/readings, the SensorResource class creates and returns a SensorReadingResource object for processing. This design allows SensorReadingResource to concentrate solely on readings, separating it from sensor logic. As a result, the code is more readable, testable, and easier to modify while reflecting the data structure where a reading belongs to a sensor.
 
